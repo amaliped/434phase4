@@ -1,0 +1,9 @@
+{
+    "name": "Ian",
+    "goals": [],
+    "currentBalance": 0,
+    "incomeTotal": 0, 
+    "incomeEntries":[],
+    "expenseTotal": 0,
+    "expenseEntries": 0
+}

@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Financial Insights</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src='script.js'></script>
+</head>
+
+<body>
+    <div class="device">
+        <div class="main-content">
+            <h1>Financial Insights</h1>
+
+            <div class="section">
+                <div class="view-switcher">
+                    <button onclick="switchView('monthly')" id="monthlyBtn" class="view-button active">Monthly</button>
+                    <button onclick="switchView('weekly')" id="weeklyBtn" class="view-button">Weekly</button>
+                </div>
+                <div class="insights-container">
+                    <div class="insight-box">
+                        <h2>Income Distribution</h2>
+                        <div class="income-item">
+                            <span class="income-name">Salary</span>
+                            <span class="income-amount monthly">$4000</span>
+                            <span class="income-amount weekly">$1000</span>
+                        </div>
+                        <div class="income-item">
+                            <span class="income-name">Freelance</span>
+                            <span class="income-amount monthly">$500</span>
+                            <span class="income-amount weekly">$125</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Yearly Insights</h2>
+                <div class="year-buttons">
+                    <button class="year-button" data-year="2025">2025</button>
+                    <button class="year-button" data-year="2024">2024</button>
+                    <button class="year-button" data-year="2023">2023</button>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Income Distribution</h2>
+                <div class="chart-container">
+                    <canvas id="incomeChart"></canvas>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Cash Flow</h2>
+                <div class="chart-container">
+                    <canvas id="cashFlowChart"></canvas>
+                </div>
+                <div class="summary" id="cashFlowSummary"></div>
+            </div>
+        </div>
+
+        <div id="nav-bar-container"></div>
+        <script>
+            fetch('navbar.html')
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById('nav-bar-container').innerHTML = data;
+                    document.querySelectorAll('.tab').forEach(tab => {
+                        tab.addEventListener('click', function () {
+                            const target = this.getAttribute('onclick').match(/'([^']+)'/)[1];
+                            window.location.href = target;
+                        });
+                    });
+                });
+
+            function switchView(view) {
+                document.getElementById('monthlyBtn').classList.toggle('active', view === 'monthly');
+                document.getElementById('weeklyBtn').classList.toggle('active', view === 'weekly');
+
+                const monthlyAmounts = document.querySelectorAll('.income-amount.monthly');
+                const weeklyAmounts = document.querySelectorAll('.income-amount.weekly');
+
+                monthlyAmounts.forEach(amount => {
+                    amount.style.display = view === 'monthly' ? 'inline' : 'none';
+                });
+
+                weeklyAmounts.forEach(amount => {
+                    amount.style.display = view === 'weekly' ? 'inline' : 'none';
+                });
+            }
+
+            const style = document.createElement('style');
+            style.textContent = `
+                .view-switcher {
+                    display: flex;
+                    gap: 10px;
+                    margin-bottom: 20px;
+                }
+
+                .view-button {
+                    padding: 8px 16px;
+                    border: 1px solid #ddd;
+                    background-color: white;
+                    border-radius: 4px;
+                    cursor: pointer;
+                    font-size: 16px;
+                }
+
+                .view-button.active {
+                    background-color: #4a90e2;
+                    color: white;
+                    border-color: #4a90e2;
+                }
+
+                .income-item {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    padding: 10px;
+                    border-bottom: 1px solid #eee;
+                }
+
+                .income-name {
+                    font-weight: bold;
+                }
+
+                .income-amount {
+                    font-weight: bold;
+                }
+
+                .income-amount.weekly {
+                    display: none;
+                }
+            `;
+            document.head.appendChild(style);
+        </script>
+    </div>
+
+    <script>
+        const financialData = {
+            2025: {
+                income: {},
+                expenses: {}
+            },
+            2024: {
+                income: {
+                    salary: 80000,
+                    bonus: 12000,
+                    investments: 4000,
+                    gifts: 1500
+                },
+                expenses: {
+                    housing: 22000,
+                    food: 11000,
+                    transportation: 7500,
+                    entertainment: 5500,
+                    utilities: 3800
+                }
+            },
+            2023: {
+                income: {
+                    salary: 75000,
+                    bonus: 10000,
+                    investments: 3000,
+                    gifts: 1000
+                },
+                expenses: {
+                    housing: 20000,
+                    food: 10000,
+                    transportation: 7000,
+                    entertainment: 5000,
+                    utilities: 3500
+                }
+            }
+        };
+
+        function load2025Data() {
+            const transactions = JSON.parse(localStorage.getItem('transactions')) || [];
+            const currentYear = new Date().getFullYear();
+
+            financialData[2025] = {
+                income: {
+                    salary: 0,
+                    bonus: 0,
+                    investments: 0,
+                    gifts: 0
+                },
+                expenses: {
+                    housing: 0,
+                    food: 0,
+                    transportation: 0,
+                    entertainment: 0,
+                    utilities: 0
+                }
+            };
+
+            transactions.forEach(transaction => {
+                const date = new Date(transaction.date);
+                if (date.getFullYear() === 2025) {
+                    if (transaction.type === '+') {
+                        const category = transaction.tag.toLowerCase();
+                        if (category === 'salary' || category === 'pay' || category === 'income') {
+                            financialData[2025].income.salary += transaction.amount;
+                        } else if (category === 'bonus') {
+                            financialData[2025].income.bonus += transaction.amount;
+                        } else if (category === 'investments' || category === 'stocks' || category === 'dividends') {
+                            financialData[2025].income.investments += transaction.amount;
+                        } else if (category === 'gifts') {
+                            financialData[2025].income.gifts += transaction.amount;
+                        } else {
+                            financialData[2025].income.salary += transaction.amount;
+                        }
+                    } else {
+                        const category = transaction.tag.toLowerCase();
+                        if (category === 'rent' || category === 'mortgage' || category === 'housing') {
+                            financialData[2025].expenses.housing += transaction.amount;
+                        } else if (category === 'food' || category === 'grocery' || category === 'dining') {
+                            financialData[2025].expenses.food += transaction.amount;
+                        } else if (category === 'car' || category === 'transport' || category === 'transportation') {
+                            financialData[2025].expenses.transportation += transaction.amount;
+                        } else if (category === 'entertainment' || category === 'fun' || category === 'hobby') {
+                            financialData[2025].expenses.entertainment += transaction.amount;
+                        } else {
+                            financialData[2025].expenses.utilities += transaction.amount;
+                        }
+                    }
+                }
+            });
+        }
+
+        let incomeChart, cashFlowChart;
+        let selectedYear = null;
+
+        function createIncomeChart(data) {
+            const ctx = document.getElementById('incomeChart').getContext('2d');
+            if (incomeChart) {
+                incomeChart.destroy();
+            }
+
+            incomeChart = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: Object.keys(data.income),
+                    datasets: [{
+                        data: Object.values(data.income),
+                        backgroundColor: [
+                            '#4a90e2',
+                            '#50e3c2',
+                            '#f5a623',
+                            '#7ed321'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: {
+                                font: {
+                                    size: 18
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function createCashFlowChart(data) {
+            const ctx = document.getElementById('cashFlowChart').getContext('2d');
+            if (cashFlowChart) {
+                cashFlowChart.destroy();
+            }
+
+            const totalIncome = Object.values(data.income).reduce((a, b) => a + b, 0);
+            const totalExpenses = Object.values(data.expenses).reduce((a, b) => a + b, 0);
+            const savings = totalIncome - totalExpenses;
+
+            cashFlowChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Income', 'Expenses'],
+                    datasets: [{
+                        data: [savings, totalExpenses],
+                        backgroundColor: ['#50e3c2', '#f5a623']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                font: {
+                                    size: 18
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            const savingsPercentage = ((savings / totalIncome) * 100).toFixed(1);
+            const expensesPercentage = ((totalExpenses / totalIncome) * 100).toFixed(1);
+            document.getElementById('cashFlowSummary').innerHTML = `
+                <p>Income: ${savingsPercentage}% ($${savings.toLocaleString()})</p>
+                <p>Expenses: ${expensesPercentage}% ($${totalExpenses.toLocaleString()})</p>
+            `;
+        }
+
+        function updateCharts(year) {
+            if (year) {
+                createIncomeChart(financialData[year]);
+                createCashFlowChart(financialData[year]);
+            } else {
+                const combinedData = {
+                    income: {},
+                    expenses: {}
+                };
+
+                Object.values(financialData).forEach(yearData => {
+                    Object.entries(yearData.income).forEach(([category, amount]) => {
+                        combinedData.income[category] = (combinedData.income[category] || 0) + amount;
+                    });
+                    Object.entries(yearData.expenses).forEach(([category, amount]) => {
+                        combinedData.expenses[category] = (combinedData.expenses[category] || 0) + amount;
+                    });
+                });
+
+                createIncomeChart(combinedData);
+                createCashFlowChart(combinedData);
+            }
+        }
+
+        function refreshCharts() {
+            load2025Data();
+            if (selectedYear === '2025') {
+                updateCharts('2025');
+            }
+        }
+
+        load2025Data();
+        updateCharts('2025');
+        document.querySelector('.year-button[data-year="2025"]').classList.add('active');
+        selectedYear = '2025';
+
+        window.addEventListener('storage', (e) => {
+            if (e.key === 'transactions') {
+                refreshCharts();
+            }
+        });
+
+        document.querySelectorAll('.year-button').forEach(button => {
+            button.addEventListener('click', () => {
+                const year = button.dataset.year;
+                if (selectedYear === year) {
+                    selectedYear = null;
+                    button.classList.remove('active');
+                    updateCharts(null);
+                } else {
+                    selectedYear = year;
+                    document.querySelectorAll('.year-button').forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+                    updateCharts(year);
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

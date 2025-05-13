@@ -1,0 +1,99 @@
+{
+    "templates": [
+        {
+            "id": "collegeStudent",
+            "name": "College Student",
+            "currentBalance": 1000.00,
+            "income": [
+                {
+                    "source": "TA Paycheck",
+                    "type": "recurring",
+                    "amount": 150.00
+                },
+                {
+                    "source": "Birthday Gift",
+                    "type": "one-time",
+                    "amount": 20.00
+                },
+                {
+                    "source": "Mom & Dad",
+                    "type": "one-time",
+                    "amount": 1500.00
+                }
+            ]
+        },
+        {
+            "id": "moneySaver",
+            "name": "Money Saver",
+            "currentBalance": 5000.00,
+            "income": [
+                {
+                    "source": "Side Business",
+                    "type": "recurring",
+                    "amount": 300.00
+                },
+                {
+                    "source": "Salary",
+                    "type": "recurring",
+                    "amount": 2500.00
+                }
+            ]
+        },
+        {
+            "id": "familyBudget",
+            "name": "Family Budget",
+            "currentBalance": 12000.00,
+            "income": [
+                {
+                    "source": "Salary 1",
+                    "type": "recurring",
+                    "amount": 4000.00
+                },
+                {
+                    "source": "Salary 2",
+                    "type": "recurring",
+                    "amount": 3500.00
+                },
+                {
+                    "source": "Child Support",
+                    "type": "recurring",
+                    "amount": 800.00
+                }
+            ]
+        },
+        {
+            "id": "investing",
+            "name": "Investing?",
+            "currentBalance": 20000.00,
+            "income": [
+                {
+                    "source": "Stock Dividends",
+                    "type": "recurring",
+                    "amount": 600.00
+                },
+                {
+                    "source": "Real Estate Rental",
+                    "type": "recurring",
+                    "amount": 1500.00
+                }
+            ]
+        },
+        {
+            "id": "entrepreneurship",
+            "name": "Entrepreneurship",
+            "currentBalance": 8000.00,
+            "income": [
+                {
+                    "source": "Freelance Projects",
+                    "type": "recurring",
+                    "amount": 2000.00
+                },
+                {
+                    "source": "Business Sales",
+                    "type": "recurring",
+                    "amount": 5000.00
+                }
+            ]
+        }
+    ]
+}

@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CMSC434 Phase 2</title>
+    <link rel="stylesheet" href="style.css" type="text/css">
+</head>
+
+<body>
+    <div class="device">
+        <div class="main-content">
+            <h1>Income/Expenses</h1>
+            <div class="common_section" style="max-width: 80%; margin: 0 auto;">
+                <input type="text" class="transactionInput" id="transactionName" placeholder="Transaction Name"
+                    required>
+                <br><br>
+                <div class="transaction-type">
+                    <button id="incomeButton" class="toggle-button">+</button>
+                    <button id="expenseButton" class="toggle-button">-</button>
+                    <span>$</span>
+                    <input type="number" class="transactionInput" id="transactionAmount" step="0.01" min="0"
+                        placeholder="0.00" required>
+                </div>
+                <br>
+
+                <select id="tagSelect" class="transactionNote">
+                    <option value="">Select Tag</option>
+                    <option value="rent">Rent</option>
+                    <option value="food">Food</option>
+                    <option value="income">Income</option>
+                    <option value="gifts">Gifts</option>
+                    <option value="new">New Tag...</option>
+                </select>
+                <input type="date" class="transactionInput" id="transactionDate" value="">
+                <br><br>
+
+                <textarea id="transactionNote" class="transactionNote" placeholder="Add a note"></textarea>
+                <br><br>
+                <button id="submitTransaction" class="submit-button">Add Transaction</button>
+            </div>
+            <br>
+
+            <h1>Entries</h1>
+            <div class="transaction-entries">
+                <div class="entries-header">
+                    <div class="balance-box">
+                        <h2 id="currBalance">Balance: $0.00</h2>
+                    </div>
+                    <div class="filter-container">
+                        <div class="filter-buttons">
+                            <button id="allButton" class="filter-button active">All</button>
+                            <button id="incomeFilterButton" class="filter-button">Income</button>
+                            <button id="expenseFilterButton" class="filter-button">Expenses</button>
+                        </div>
+                        <div class="type-filter-buttons">
+                            <button id="allTypeButton" class="type-filter-button active">All Types</button>
+                            <button id="salaryButton" class="type-filter-button">Salary</button>
+                            <button id="bonusButton" class="type-filter-button">Bonus</button>
+                            <button id="investmentsButton" class="type-filter-button">Investments</button>
+                            <button id="giftsButton" class="type-filter-button">Gifts</button>
+                            <button id="rentButton" class="type-filter-button">Rent</button>
+                            <button id="foodButton" class="type-filter-button">Food</button>
+                            <button id="transportationButton" class="type-filter-button">Transportation</button>
+                            <button id="entertainmentButton" class="type-filter-button">Entertainment</button>
+                            <button id="utilitiesButton" class="type-filter-button">Utilities</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="entriesList" class="entries-list"></div>
+            </div>
+        </div>
+
+        <div id="nav-bar-container"></div>
+        <script>
+            fetch('navbar.html')
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById('nav-bar-container').innerHTML = data;
+                })
+                .catch(error => {
+                    console.error('Error loading navbar:', error);
+                });
+        </script>
+        <script src="script.js"></script>
+    </div>
+
+    <style>
+        .filter-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 10px;
+            width: 100%;
+            max-width: 800px;
+        }
+
+        .filter-buttons,
+        .type-filter-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .filter-button,
+        .type-filter-button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            background-color: #f0f0f0;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            white-space: nowrap;
+            font-size: 16px;
+        }
+
+        .filter-button.active,
+        .type-filter-button.active {
+            background-color: #4a90e2;
+            color: white;
+        }
+
+        .type-filter-buttons {
+            margin-top: 10px;
+        }
+
+        .transaction-entries {
+            margin-top: 20px;
+        }
+
+        .entries-header {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .balance-box {
+            background-color: #f8f9fa;
+            padding: 15px 30px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .entry-box {
+            position: relative;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            background-color: white;
+        }
+
+        .delete-button {
+            position: absolute;
+            bottom: 5px;
+            right: 5px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+            color: #666;
+        }
+
+        .delete-button:hover {
+            background-color: #ffebee;
+            color: #d32f2f;
+        }
+    </style>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const incomeButton = document.getElementById('incomeButton');
+            const expenseButton = document.getElementById('expenseButton');
+            const submitButton = document.getElementById('submitTransaction');
+            const tagSelect = document.getElementById('tagSelect');
+            const transactionDate = document.getElementById('transactionDate');
+            const entriesList = document.getElementById('entriesList');
+            const balanceElement = document.getElementById('currBalance');
+
+            const allFilterButton = document.getElementById('allButton');
+            const incomeFilterButton = document.getElementById('incomeFilterButton');
+            const expenseFilterButton = document.getElementById('expenseFilterButton');
+
+            const allTypeButton = document.getElementById('allTypeButton');
+            const salaryButton = document.getElementById('salaryButton');
+            const bonusButton = document.getElementById('bonusButton');
+            const investmentsButton = document.getElementById('investmentsButton');
+            const giftsButton = document.getElementById('giftsButton');
+            const rentButton = document.getElementById('rentButton');
+            const foodButton = document.getElementById('foodButton');
+            const transportationButton = document.getElementById('transportationButton');
+            const entertainmentButton = document.getElementById('entertainmentButton');
+            const utilitiesButton = document.getElementById('utilitiesButton');
+
+            let currentType = '+';
+            let transactions = JSON.parse(localStorage.getItem('transactions')) || [];
+            let currentBalance = parseFloat(localStorage.getItem('currentBalance')) || 0;
+            let currentFilter = 'all';
+            let selectedTypeFilters = new Set();
+
+            function updateTypeFilterButtons() {
+                const typeFilterContainer = document.querySelector('.type-filter-buttons');
+                typeFilterContainer.innerHTML = '';
+
+                const allTypeButton = document.createElement('button');
+                allTypeButton.id = 'allTypeButton';
+                allTypeButton.className = `type-filter-button ${selectedTypeFilters.size === 0 ? 'active' : ''}`;
+                allTypeButton.textContent = 'All Types';
+                allTypeButton.addEventListener('click', () => {
+                    selectedTypeFilters.clear();
+                    document.querySelectorAll('.type-filter-button').forEach(btn => btn.classList.remove('active'));
+                    allTypeButton.classList.add('active');
+                    loadTransactions();
+                });
+                typeFilterContainer.appendChild(allTypeButton);
+
+                const uniqueTags = new Set();
+                transactions.forEach(transaction => {
+                    uniqueTags.add(transaction.tag.toLowerCase());
+                });
+
+                uniqueTags.forEach(tag => {
+                    const button = document.createElement('button');
+                    button.className = `type-filter-button ${selectedTypeFilters.has(tag) ? 'active' : ''}`;
+                    button.textContent = tag.charAt(0).toUpperCase() + tag.slice(1);
+                    button.addEventListener('click', () => {
+                        if (selectedTypeFilters.has(tag)) {
+                            selectedTypeFilters.delete(tag);
+                            button.classList.remove('active');
+                        } else {
+                            selectedTypeFilters.add(tag);
+                            button.classList.add('active');
+                            document.getElementById('allTypeButton').classList.remove('active');
+                        }
+                        loadTransactions();
+                    });
+                    typeFilterContainer.appendChild(button);
+                });
+            }
+
+            function loadTransactions() {
+                entriesList.innerHTML = '';
+                const filteredTransactions = transactions.filter(transaction => {
+                    if (currentFilter !== 'all') {
+                        if (currentFilter === 'income' && transaction.type !== '+') return false;
+                        if (currentFilter === 'expense' && transaction.type !== '-') return false;
+                    }
+
+                    if (selectedTypeFilters.size > 0) {
+                        return selectedTypeFilters.has(transaction.tag.toLowerCase());
+                    }
+
+                    return true;
+                });
+
+                filteredTransactions.forEach(transaction => {
+                    const entry = document.createElement('div');
+                    entry.classList.add('entry');
+                    entry.innerHTML = `
+                        <div class="entry-box">
+                            <div class="entry-header">
+                                <span class="entry-name">${transaction.name}</span>
+                                <span class="entry-amount ${transaction.type === '+' ? 'income' : 'expense'}">${transaction.type}$${transaction.amount.toFixed(2)}</span>
+                            </div>
+                            <div class="entry-details">
+                                <span class="entry-label">Tag:</span> <span class="entry-tag">${transaction.tag}</span>
+                                <br>
+                                <span class="entry-label">Date:</span> <span class="entry-date">${transaction.date}</span>
+                            </div>
+                            ${transaction.note ? `<br><div class="entry-note">${transaction.note}</div>` : ''}
+                            <button class="delete-button" data-index="${transactions.indexOf(transaction)}">×</button>
+                        </div>
+                    `;
+                    entriesList.appendChild(entry);
+                });
+                balanceElement.textContent = `Balance: $${currentBalance.toFixed(2)}`;
+            }
+
+            loadTransactions();
+            updateTypeFilterButtons();
+            transactionDate.valueAsDate = new Date();
+
+            allFilterButton.addEventListener('click', () => {
+                currentFilter = 'all';
+                document.querySelectorAll('.filter-button').forEach(btn => btn.classList.remove('active'));
+                allFilterButton.classList.add('active');
+                loadTransactions();
+            });
+
+            incomeFilterButton.addEventListener('click', () => {
+                currentFilter = 'income';
+                document.querySelectorAll('.filter-button').forEach(btn => btn.classList.remove('active'));
+                incomeFilterButton.classList.add('active');
+                loadTransactions();
+            });
+
+            expenseFilterButton.addEventListener('click', () => {
+                currentFilter = 'expense';
+                document.querySelectorAll('.filter-button').forEach(btn => btn.classList.remove('active'));
+                expenseFilterButton.classList.add('active');
+                loadTransactions();
+            });
+
+            tagSelect.addEventListener('change', (e) => {
+                if (e.target.value === 'new') {
+                    const newTag = prompt('Enter a new tag name:');
+                    if (newTag) {
+                        const newOption = document.createElement('option');
+                        newOption.value = newTag.toLowerCase();
+                        newOption.textContent = newTag;
+                        tagSelect.insertBefore(newOption, tagSelect.lastElementChild);
+                        tagSelect.value = newOption.value;
+                        updateTypeFilterButtons();
+                    }
+                }
+            });
+
+            incomeButton.addEventListener('click', () => {
+                currentType = '+';
+                incomeButton.classList.add('active');
+                expenseButton.classList.remove('active');
+            });
+
+            expenseButton.addEventListener('click', () => {
+                currentType = '-';
+                expenseButton.classList.add('active');
+                incomeButton.classList.remove('active');
+            });
+
+            submitButton.addEventListener('click', addTransaction);
+
+            function addTransaction() {
+                const name = document.getElementById('transactionName').value;
+                const amount = parseFloat(document.getElementById('transactionAmount').value);
+                const tag = document.getElementById('tagSelect').value;
+                const date = document.getElementById('transactionDate').value;
+                const note = document.getElementById('transactionNote').value;
+
+                if (!name || !amount || !tag) {
+                    alert('Fill in all the required fields');
+                    return;
+                }
+
+                const transaction = {
+                    name,
+                    amount,
+                    tag,
+                    date,
+                    note,
+                    type: currentType
+                };
+
+                transactions.push(transaction);
+                localStorage.setItem('transactions', JSON.stringify(transactions));
+
+                if (currentType === '+') {
+                    currentBalance += amount;
+                } else {
+                    currentBalance -= amount;
+                }
+                localStorage.setItem('currentBalance', currentBalance.toString());
+
+                loadTransactions();
+                updateTypeFilterButtons()
+                clearTransactionForm();
+            }
+
+            function clearTransactionForm() {
+                document.getElementById('transactionName').value = '';
+                document.getElementById('transactionAmount').value = '';
+                document.getElementById('tagSelect').value = '';
+                document.getElementById('transactionNote').value = '';
+                transactionDate.valueAsDate = new Date();
+            }
+
+            function deleteTransaction(index) {
+                if (index >= 0 && index < transactions.length) {
+                    const transaction = transactions[index];
+                    if (transaction.type === '+') {
+                        currentBalance -= transaction.amount;
+                    } else {
+                        currentBalance += transaction.amount;
+                    }
+                    transactions.splice(index, 1);
+                    localStorage.setItem('transactions', JSON.stringify(transactions));
+                    localStorage.setItem('currentBalance', currentBalance.toString());
+                    loadTransactions();
+                    updateTypeFilterButtons()
+                }
+            }
+
+            document.addEventListener('click', (e) => {
+                if (e.target.classList.contains('delete-button')) {
+                    const index = parseInt(e.target.getAttribute('data-index'));
+                    deleteTransaction(index);
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CMSC434 Phase 2</title>
+    <link rel="stylesheet" href="../style.css" type="text/css">
+</head>
+<body>
+    <div class="device">
+        <a href="../templates.html" class="back-button">← Back</a>
+        <h1 style="text-align: center;">Money Saver Template</h1>
+        <p style="text-align: center;">Current: <strong id="current-balance">$1000.00</strong></p>
+        <div class="tabs">
+            <button class="tab-button active" onclick="showTab('income', this)">Income</button>
+            <button class="tab-button" onclick="showTab('expenses', this)">Expenses</button>
+            <button class="tab-button" onclick="showTab('goals', this)">Goals</button>
+        </div>
+        <div id="taskList"></div>
+        
+        <div style="text-align: center;" id="income" class="tab-content active">
+            <h2>Income</h2>
+            <button onclick="openModal('income')">Add</button>
+            <div id="income-list"></div>
+        </div>
+        
+        <div style="text-align: center;" id="expenses" class="tab-content">
+            <h2>Expenses</h2>
+            <button onclick="openModal('expenses')">Add</button>
+            <div id="expenses-list"></div>
+        </div>
+        
+        <div style="text-align: center;" id="goals" class="tab-content">
+            <h2>Goals</h2>
+            <button onclick="openModal('goals')">Add</button>
+            <div id="goals-list"></div>
+        </div>
+        
+        <div class="modal-overlay" id="modal-overlay"></div>
+        <div class="modal" id="modal">
+            <h2>Add Item</h2>
+            <label>Name:</label>
+            <input type="text" id="modal-name" placeholder="Enter name"><br>
+            <label>Recurrence:</label>
+            <select id="modal-recurrence">
+                <option value="once">Once</option>
+                <option value="daily">Daily</option>
+                <option value="monthly">Monthly</option>
+                <option value="yearly">Yearly</option>
+            </select><br>
+            <label>Notes:</label>
+            <input type="text" id="modal-notes" placeholder="Enter notes"><br>
+            <label>Amount:</label>
+            <input type="number" id="modal-amount" placeholder="Enter amount"><br>
+            <button onclick="confirmAddItem()">Confirm</button>
+            <button onclick="closeModal()">Cancel</button>
+        </div>
+    </div>
+
+    <script>
+        let currentTab = '';
+        
+        const incomeData = [
+            { name: 'Business', recurrence: 'monthly', notes: 'Notes', amount: 500 },
+            { name: 'Salary', recurrence: 'yearly', notes: 'Notes', amount: 1800 },
+        ];
+    
+        const expenseData = [
+            { name: 'Rent', recurrence: 'monthly', notes: 'Notes', amount: 700 },
+        ];
+
+        const goalData = [
+            { name: 'Vacation', recurrence: 'monthly', notes: '', amount: 100},
+            { name: 'Big Goal', recurrence: 'monthly', notes: '', amount: 100},
+
+        ];
+
+        function populateData() {
+            const incomeList = document.getElementById('income-list');
+            const expensesList = document.getElementById('expenses-list');
+            const goalsList = document.getElementById('goals-list');
+
+            incomeData.forEach(item => {
+                const box = document.createElement('div');
+                box.className = 'subtemplate-list';
+                box.innerHTML = `<strong>${item.name}</strong> $${item.amount.toFixed(2)} (${item.recurrence})<br>${item.notes}`;
+                incomeList.appendChild(box);
+            });
+
+            expenseData.forEach(item => {
+                const box = document.createElement('div');
+                box.className = 'subtemplate-list';
+                box.innerHTML = `<strong>${item.name}</strong> $${item.amount.toFixed(2)} (${item.recurrence})<br>${item.notes}`;
+                expensesList.appendChild(box);
+            });
+
+            goalData.forEach(item => {
+                const box = document.createElement('div');
+                box.className = 'subtemplate-list';
+                box.innerHTML = `<strong>${item.name}</strong> $${item.amount.toFixed(2)} (${item.recurrence})<br>${item.notes}`;
+                goalsList.appendChild(box);
+            });
+        }
+
+        function showTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-button').forEach(button => button.classList.remove('active'));
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        function openModal(tab) {
+            currentTab = tab;
+            document.getElementById('modal-overlay').style.display = 'block';
+            document.getElementById('modal').style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('modal-overlay').style.display = 'none';
+            document.getElementById('modal').style.display = 'none';
+        }
+
+        function confirmAddItem() {
+            let name = document.getElementById('modal-name').value;
+            let recurrence = document.getElementById('modal-recurrence').value;
+            let notes = document.getElementById('modal-notes').value;
+            let amount = document.getElementById('modal-amount').value;
+            
+            const box = document.createElement('div');
+            box.className = 'subtemplate-list';
+            box.innerHTML = `<strong>${name}</strong> $${parseFloat(amount).toFixed(2)} (${recurrence})<br>${notes}`;
+
+            if (currentTab === 'income') {
+                document.getElementById("income-list").appendChild(box);
+            } else if (currentTab === 'expenses') {
+                document.getElementById("expenses-list").appendChild(box);
+            } else if (currentTab === 'goals') {
+                document.getElementById("goals-list").appendChild(box);
+            }
+            
+            closeModal();
+        }
+
+        window.onload = populateData;
+    </script>
+</body>
+</html>

@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Budget Templates</title>
+    <link rel="stylesheet" href="style.css" type="text/css">
+</head>
+
+<body>
+    <div class="device">
+        <div class="main-content">
+            <h1>Budget Templates</h1>
+            <div class="section">
+                <div class="template-actions">
+                    <button onclick="showCreateTemplateModal()" class="create-button">Create New Template</button>
+                </div>
+                <h2>Select a Template</h2>
+                <div class="template-grid">
+                    <div class="template-card">
+                        <h2>College Student</h2>
+                        <p>A budget template for college students managing tuition, books, and living expenses.</p>
+                        <div class="template-buttons">
+                            <button onclick="duplicateTemplate('college')" class="duplicate-button">Duplicate</button>
+                            <button onclick="useTemplate('college')" class="use-button">Use</button>
+                        </div>
+                    </div>
+
+                    <div class="template-card">
+                        <h2>Money Saver</h2>
+                        <p>Template focused on saving money by reducing expenses in key categories.</p>
+                        <div class="template-buttons">
+                            <button onclick="duplicateTemplate('savings')" class="duplicate-button">Duplicate</button>
+                            <button onclick="useTemplate('savings')" class="use-button">Use</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="nav-bar-container"></div>
+        <script>
+            fetch('navbar.html')
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById('nav-bar-container').innerHTML = data;
+                    document.querySelectorAll('.tab').forEach(tab => {
+                        tab.addEventListener('click', function () {
+                            const target = this.getAttribute('onclick').match(/'([^']+)'/)[1];
+                            window.location.href = target;
+                        });
+                    });
+                });
+
+            const templates = {
+                'college': {
+                    name: 'College Student',
+                    goals: [
+                        { name: 'Tuition', amount: 5000, category: 'savings' },
+                        { name: 'Books', amount: 1000, category: 'savings' },
+                        { name: 'Food', amount: 200, category: 'expense' }
+                    ],
+                    analysis: 'This template helps college students manage their educational expenses.'
+                },
+                'savings': {
+                    name: 'Money Saver',
+                    goals: [
+                        { name: 'Groceries', amount: 300, category: 'expense' },
+                        { name: 'Entertainment', amount: 200, category: 'expense' },
+                        { name: 'Emergency Fund', amount: 1000, category: 'savings' }
+                    ],
+                    analysis: 'This template focuses on reducing expenses and building savings.'
+                }
+            };
+
+            function showCreateTemplateModal() {
+                const modal = document.createElement('div');
+                modal.className = 'edit-modal';
+                modal.innerHTML = `
+                    <div class="edit-modal-content">
+                        <h2>Create New Template</h2>
+                        <div class="edit-section">
+                            <h3>Template Name</h3>
+                            <input type="text" id="templateName" placeholder="Enter template name">
+                        </div>
+                        <div class="edit-section">
+                            <h3>Goals</h3>
+                            <div id="editGoalsList"></div>
+                            <button onclick="addNewGoal()" class="add-goal-button">Add Goal</button>
+                        </div>
+                        <div class="edit-section">
+                            <h3>Analysis</h3>
+                            <textarea id="editAnalysis" class="edit-analysis" placeholder="Enter template analysis"></textarea>
+                        </div>
+                        <div class="edit-buttons">
+                            <button onclick="saveNewTemplate()" class="save-button">Save Template</button>
+                            <button onclick="closeEditModal()" class="cancel-button">Cancel</button>
+                        </div>
+                    </div>
+                `;
+                document.body.appendChild(modal);
+                renderEditGoals();
+            }
+
+            function duplicateTemplate(templateKey) {
+                const template = templates[templateKey];
+                const modal = document.createElement('div');
+                modal.className = 'edit-modal';
+                modal.innerHTML = `
+                    <div class="edit-modal-content">
+                        <h2>Duplicate Template</h2>
+                        <div class="edit-section">
+                            <h3>New Template Name</h3>
+                            <input type="text" id="templateName" value="${template.name} (Copy)">
+                        </div>
+                        <div class="edit-section">
+                            <h3>Goals</h3>
+                            <div id="editGoalsList"></div>
+                            <button onclick="addNewGoal()" class="add-goal-button">Add Goal</button>
+                        </div>
+                        <div class="edit-section">
+                            <h3>Analysis</h3>
+                            <textarea id="editAnalysis" class="edit-analysis">${template.analysis}</textarea>
+                        </div>
+                        <div class="edit-buttons">
+                            <button onclick="saveNewTemplate()" class="save-button">Save Template</button>
+                            <button onclick="closeEditModal()" class="cancel-button">Cancel</button>
+                        </div>
+                    </div>
+                `;
+                document.body.appendChild(modal);
+                renderEditGoals(template.goals);
+            }
+
+            function renderEditGoals(initialGoals = []) {
+                const goalsList = document.getElementById('editGoalsList');
+                goalsList.innerHTML = '';
+
+                initialGoals.forEach((goal, index) => {
+                    addGoalToEditList(goal.name, goal.amount, goal.category);
+                });
+            }
+
+            function addNewGoal() {
+                addGoalToEditList('', 0, 'savings');
+            }
+
+            function addGoalToEditList(name = '', amount = 0, category = 'savings') {
+                const goalsList = document.getElementById('editGoalsList');
+                const goalElement = document.createElement('div');
+                goalElement.className = 'edit-goal-item';
+                goalElement.innerHTML = `
+                    <input type="text" class="edit-goal-name" value="${name}" placeholder="Goal Name">
+                    <input type="number" class="edit-goal-amount" value="${amount}" placeholder="Amount">
+                    <select class="edit-goal-category">
+                        <option value="savings" ${category === 'savings' ? 'selected' : ''}>Savings</option>
+                        <option value="expense" ${category === 'expense' ? 'selected' : ''}>Expense</option>
+                    </select>
+                    <button onclick="this.parentElement.remove()" class="remove-goal-button">×</button>
+                `;
+                goalsList.appendChild(goalElement);
+            }
+
+            function saveNewTemplate() {
+                const name = document.getElementById('templateName').value;
+                if (!name) {
+                    alert('Please enter a template name');
+                    return;
+                }
+
+                const goalsList = document.getElementById('editGoalsList');
+                const goals = Array.from(goalsList.children).map(goalElement => ({
+                    name: goalElement.querySelector('.edit-goal-name').value,
+                    amount: parseFloat(goalElement.querySelector('.edit-goal-amount').value),
+                    category: goalElement.querySelector('.edit-goal-category').value
+                }));
+
+                if (goals.length === 0) {
+                    alert('Please add at least one goal');
+                    return;
+                }
+
+                const analysis = document.getElementById('editAnalysis').value;
+                const templateKey = name.toLowerCase().replace(/\s+/g, '_');
+
+                templates[templateKey] = {
+                    name,
+                    goals,
+                    analysis
+                };
+
+                const templateGrid = document.querySelector('.template-grid');
+                const newTemplateCard = document.createElement('div');
+                newTemplateCard.className = 'template-card';
+                newTemplateCard.innerHTML = `
+                    <h2>${name}</h2>
+                    <p>${analysis}</p>
+                    <div class="template-buttons">
+                        <button onclick="duplicateTemplate('${templateKey}')" class="duplicate-button">Duplicate</button>
+                        <button onclick="useTemplate('${templateKey}')" class="use-button">Use</button>
+                    </div>
+                `;
+                templateGrid.appendChild(newTemplateCard);
+
+                closeEditModal();
+            }
+
+            function closeEditModal() {
+                const modal = document.querySelector('.edit-modal');
+                if (modal) {
+                    modal.remove();
+                }
+            }
+
+            function useTemplate(templateKey) {
+                const template = templates[templateKey];
+                localStorage.setItem('templateData', JSON.stringify({
+                    goals: template.goals,
+                    analysis: template.analysis
+                }));
+                window.location.href = 'main.html';
+            }
+
+            const style = document.createElement('style');
+            style.textContent = `
+                .template-actions {
+                    margin-bottom: 20px;
+                }
+
+                .create-button {
+                    padding: 10px 20px;
+                    background-color: #4a90e2;
+                    color: white;
+                    border: none;
+                    border-radius: 4px;
+                    cursor: pointer;
+                    font-size: 16px;
+                }
+
+                .template-buttons {
+                    display: flex;
+                    gap: 10px;
+                    margin-top: 15px;
+                }
+
+                .duplicate-button {
+                    padding: 8px 16px;
+                    background-color: #f0f0f0;
+                    color: #333;
+                    border: none;
+                    border-radius: 4px;
+                    cursor: pointer;
+                    font-size: 16px;
+                }
+
+                .use-button {
+                    padding: 8px 16px;
+                    background-color: #4a90e2;
+                    color: white;
+                    border: none;
+                    border-radius: 4px;
+                    cursor: pointer;
+                    font-size: 16px;
+                }
+
+                .edit-modal {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background-color: rgba(0, 0, 0, 0.5);
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    z-index: 1000;
+                }
+
+                .edit-modal-content {
+                    background-color: white;
+                    padding: 20px;
+                    border-radius: 8px;
+                    width: 80%;
+                    max-width: 600px;
+                    max-height: 80vh;
+                    overflow-y: auto;
+                }
+
+                .edit-section {
+                    margin-bottom: 20px;
+                }
+
+                .edit-goal-item {
+                    display: flex;
+                    gap: 10px;
+                    margin-bottom: 10px;
+                    align-items: center;
+                }
+
+                .edit-goal-name, .edit-goal-amount, .edit-goal-category {
+                    padding: 8px;
+                    border: 1px solid #ddd;
+                    border-radius: 4px;
+                }
+
+                .edit-goal-name {
+                    flex: 2;
+                }
+
+                .edit-goal-amount {
+                    flex: 1;
+                }
+
+                .edit-goal-category {
+                    flex: 1;
+                }
+
+                .edit-analysis {
+                    width: 100%;
+                    height: 100px;
+                    padding: 8px;
+                    border: 1px solid #ddd;
+                    border-radius: 4px;
+                    resize: vertical;
+                }
+
+                .edit-buttons {
+                    display: flex;
+                    gap: 10px;
+                    justify-content: flex-end;
+                    margin-top: 20px;
+                }
+
+                .save-button, .cancel-button {
+                    padding: 8px 16px;
+                    border: none;
+                    border-radius: 4px;
+                    cursor: pointer;
+                }
+
+                .save-button {
+                    background-color: #4a90e2;
+                    color: white;
+                }
+
+                .cancel-button {
+                    background-color: #f0f0f0;
+                }
+
+                .add-goal-button {
+                    padding: 8px 16px;
+                    background-color: #4a90e2;
+                    color: white;
+                    border: none;
+                    border-radius: 4px;
+                    cursor: pointer;
+                    margin-top: 10px;
+                }
+
+                .remove-goal-button {
+                    background: none;
+                    border: none;
+                    color: #ff4444;
+                    font-size: 20px;
+                    cursor: pointer;
+                    padding: 0 5px;
+                }
+            `;
+            document.head.appendChild(style);
+        </script>
+    </div>
+</body>
+
+</html>

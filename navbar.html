@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<footer class="footer">
+  <button class="tab" id="goalTab" onclick="navigateTo('main.html', this)"> Goals </button>
+  <button class="tab" id="incomeExpenseTab" onclick="navigateTo('balance.html', this)"> Balance </button>
+  <button class="tab" id="insights" onclick="navigateTo('insights.html', this)"> Insights </button>
+  <button class="tab" id="templates" onclick="navigateTo('templates.html', this)"> Templates </button>
+</footer>
+<script>
+  function navigateTo(page, button) {
+    var tabs = document.querySelectorAll('.tab');
+    tabs.forEach(tab => tab.classList.remove('active'));
+
+    button.classList.add('active');
+
+    window.location.href = page;
+  }
+</script>
+
+</html>
+
+<style>
+  .footer {
+    height: 100px;
+  }
+
+  #navbar {
+    background-color: #333;
+    padding: 10px 20px;
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+  }
+
+  .tab {
+    background-color: #444;
+    color: white;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 6px;
+    font-size: 25px;
+    height: 100%;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+
+  .tab.active {
+    background-color: #007BFF;
+  }
+</style>

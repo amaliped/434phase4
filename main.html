@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Goals</title>
+    <link rel="stylesheet" href="style.css" type="text/css">
+</head>
+
+<body>
+    <div class="device">
+        <div class="main-content">
+            <h1>Goals</h1>
+            <div class="section">
+                <h2>Add New Goal</h2>
+                <div class="goal-form">
+                    <input type="text" id="goalName" placeholder="Goal Name" required>
+                    <div class="goal-input-group">
+                        <span>$</span>
+                        <input type="number" id="goalAmt" placeholder="Amount" step="0.01" min="0">
+                    </div>
+                    <select id="tagSelect" class="goal-select">
+                        <option value="" disabled selected>Select Category</option>
+                        <option value="savings">Savings</option>
+                        <option value="expense">Expense</option>
+                        <option value="new">New Tag...</option>
+
+                    </select>
+                    <button type="button" id="addGoal" class="submit-button">Add Goal</button>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Your Goals</h2>
+                <div id="templateAnalysis" class="template-analysis"></div>
+                <div id="goalsList" class="goals-list"></div>
+            </div>
+        </div>
+
+        <div id="nav-bar-container"></div>
+        <script>
+            fetch('navbar.html')
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById('nav-bar-container').innerHTML = data;
+                    document.querySelectorAll('.tab').forEach(tab => {
+                        tab.addEventListener('click', function () {
+                            const target = this.getAttribute('onclick').match(/'([^']+)'/)[1];
+                            window.location.href = target;
+                        });
+                    });
+                });
+        </script>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const goalsList = document.getElementById('goalsList');
+            const addGoalButton = document.getElementById('addGoal');
+            const templateAnalysis = document.getElementById('templateAnalysis');
+            let goals = JSON.parse(localStorage.getItem('goals')) || [];
+
+            const templateData = localStorage.getItem('templateData');
+            if (templateData) {
+                const template = JSON.parse(templateData);
+                goals = template.goals;
+                localStorage.setItem('goals', JSON.stringify(goals));
+                templateAnalysis.textContent = template.analysis;
+                templateAnalysis.style.display = 'block';
+                localStorage.removeItem('templateData');
+            } else {
+                templateAnalysis.style.display = 'none';
+            }
+
+            function loadGoals() {
+                goalsList.innerHTML = '';
+                const currentBalance = parseFloat(localStorage.getItem('currentBalance')) || 0;
+
+                goals.forEach((goal, index) => {
+                    const goalElement = document.createElement('div');
+                    goalElement.className = 'goal-box';
+                    const progress = Math.min((currentBalance / goal.amount) * 100, 100);
+
+                    goalElement.innerHTML = `
+                        <div class="goal-header">
+                            <span class="goal-name">${goal.name}</span>
+                            <span class="goal-amount">$${goal.amount.toFixed(2)}</span>
+                        </div>
+                        <div class="goal-progress">
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: ${progress}%"></div>
+                            </div>
+                            <span class="progress-text">${progress.toFixed(1)}%</span>
+                        </div>
+                        <div class="goal-details">
+                            <span class="goal-category">${goal.category}</span>
+                            <div class="goal-actions">
+                                <button class="complete-goal ${currentBalance >= goal.amount ? '' : 'disabled'}" 
+                                        data-index="${index}" 
+                                        ${currentBalance >= goal.amount ? '' : 'disabled'}>
+                                    ✓
+                                </button>
+                                <button class="edit-goal" data-index="${index}">✎</button>
+                                <button class="delete-goal" data-index="${index}">×</button>
+                            </div>
+                        </div>
+                    `;
+                    goalsList.appendChild(goalElement);
+                });
+
+                document.querySelectorAll('.complete-goal').forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        const index = e.target.dataset.index;
+                        const goal = goals[index];
+                        const currentBalance = parseFloat(localStorage.getItem('currentBalance')) || 0;
+
+                        if (currentBalance >= goal.amount) {
+                            const newBalance = currentBalance - goal.amount;
+                            localStorage.setItem('currentBalance', newBalance.toString());
+
+                            goals.splice(index, 1);
+                            localStorage.setItem('goals', JSON.stringify(goals));
+                            loadGoals();
+                        }
+                    });
+                });
+
+                document.querySelectorAll('.edit-goal').forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        const index = e.target.dataset.index;
+                        const goal = goals[index];
+                        showEditModal(goal, index);
+                    });
+                });
+
+                document.querySelectorAll('.delete-goal').forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        if (confirm('Are you sure you want to delete this goal?')) {
+                            const index = e.target.dataset.index;
+                            goals.splice(index, 1);
+                            localStorage.setItem('goals', JSON.stringify(goals));
+                            loadGoals();
+                        }
+                    });
+                });
+            }
+
+            function showEditModal(goal, index) {
+                const modal = document.createElement('div');
+                modal.className = 'edit-modal';
+                modal.innerHTML = `
+                    <div class="edit-modal-content">
+                        <h2>Edit Goal</h2>
+                        <div class="edit-section">
+                            <input type="text" id="editGoalName" value="${goal.name}" placeholder="Goal Name">
+                            <div class="goal-input-group">
+                                <span>$</span>
+                                <input type="number" id="editGoalAmount" value="${goal.amount}" placeholder="Amount" step="0.01" min="0">
+                            </div>
+                            <select id="editGoalCategory">
+                                <option value="savings" ${goal.category === 'savings' ? 'selected' : ''}>Savings</option>
+                                <option value="expense" ${goal.category === 'expense' ? 'selected' : ''}>Expense</option>
+                            </select>
+                        </div>
+                        <div class="edit-buttons">
+                            <button class="save-button" data-index="${index}">Save</button>
+                            <button class="cancel-button">Cancel</button>
+                        </div>
+                    </div>
+                `;
+                document.body.appendChild(modal);
+
+                modal.querySelector('.save-button').addEventListener('click', () => {
+                    const name = document.getElementById('editGoalName').value;
+                    const amount = parseFloat(document.getElementById('editGoalAmount').value);
+                    const category = document.getElementById('editGoalCategory').value;
+
+                    if (!name || !amount || !category) {
+                        alert('Please fill in all fields');
+                        return;
+                    }
+
+                    goals[index] = {
+                        name,
+                        amount,
+                        category
+                    };
+
+                    localStorage.setItem('goals', JSON.stringify(goals));
+                    closeEditModal();
+                    loadGoals();
+                });
+
+                modal.querySelector('.cancel-button').addEventListener('click', closeEditModal);
+            }
+
+            function closeEditModal() {
+                const modal = document.querySelector('.edit-modal');
+                if (modal) {
+                    modal.remove();
+                }
+            }
+
+            // Add keyboard image
+            const keyboardImg = document.createElement('img');
+            keyboardImg.src = 'keyboard.jpeg';
+            keyboardImg.className = 'keyboard-image';
+            keyboardImg.style.display = 'none';
+            document.body.appendChild(keyboardImg);
+
+            // Add event listeners for the Add New Goal input
+            const goalNameInput = document.getElementById('goalName');
+            goalNameInput.addEventListener('focus', () => {
+                keyboardImg.style.display = 'block';
+            });
+
+            goalNameInput.addEventListener('blur', () => {
+                keyboardImg.style.display = 'none';
+            });
+
+            const style = document.createElement('style');
+            style.textContent = `
+                .goal-actions {
+                    display: flex;
+                    gap: 5px;
+                }
+
+                .complete-goal, .edit-goal, .delete-goal {
+                    background: none;
+                    border: none;
+                    font-size: 18pt;
+                    cursor: pointer;
+                    padding: 0 5px;
+                }
+
+                .complete-goal {
+                    color: #2ecc71;
+                }
+
+                .complete-goal.disabled {
+                    color: #ccc;
+                    cursor: not-allowed;
+                }
+
+                .edit-goal {
+                    color: #4a90e2;
+                }
+
+                .delete-goal {
+                    color: #ff4444;
+                    font-size: 22pt;
+                }
+
+                .edit-modal {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background-color: rgba(0, 0, 0, 0.5);
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    z-index: 1000;
+                }
+
+                .edit-modal-content {
+                    background-color: white;
+                    padding: 20px;
+                    border-radius: 8px;
+                    width: 80%;
+                    max-width: 400px;
+                }
+
+                .edit-section {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 10px;
+                    margin-bottom: 20px;
+                }
+
+                .edit-buttons {
+                    display: flex;
+                    gap: 10px;
+                    justify-content: flex-end;
+                }
+
+                .save-button, .cancel-button {
+                    padding: 8px 16px;
+                    border: none;
+                    border-radius: 4px;
+                    cursor: pointer;
+                }
+
+                .save-button {
+                    background-color: #4a90e2;
+                    color: white;
+                }
+
+                .cancel-button {
+                    background-color: #f0f0f0;
+                }
+
+                .keyboard-image {
+                    position: fixed;
+                    bottom: 0%;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    width: 100%;
+                    max-width: 650px; 
+                    height: auto;
+                    z-index: 1001;
+                    pointer-events: none;
+                }
+
+                .pie-chart-legend {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 25px;
+                    margin-top: 40px;
+                }
+
+                .legend-item {
+                    display: flex;
+                    align-items: center;
+                    gap: 20px;
+                    font-size: 28px;
+                    font-weight: bold;
+                }
+
+                .legend-color {
+                    width: 40px;
+                    height: 40px;
+                    border-radius: 8px;
+                }
+            `;
+            document.head.appendChild(style);
+
+            addGoalButton.addEventListener('click', () => {
+                const name = document.getElementById('goalName').value;
+                const amount = parseFloat(document.getElementById('goalAmt').value);
+                const category = document.getElementById('tagSelect').value;
+
+                if (!name || !amount || !category) {
+                    alert('Please fill in all fields');
+                    return;
+                }
+
+                const goal = {
+                    name,
+                    amount,
+                    category
+                };
+
+                goals.push(goal);
+                localStorage.setItem('goals', JSON.stringify(goals));
+                loadGoals();
+
+                document.getElementById('goalName').value = '';
+                document.getElementById('goalAmt').value = '';
+                document.getElementById('tagSelect').value = '';
+            });
+
+            const tagSelect = document.getElementById('tagSelect');
+            tagSelect.addEventListener('change', (e) => {
+                if (e.target.value === 'new') {
+                    const newCategory = prompt('Enter a new category name:');
+                    if (newCategory) {
+                        const newOption = document.createElement('option');
+                        newOption.value = newCategory.toLowerCase();
+                        newOption.textContent = newCategory;
+                        tagSelect.insertBefore(newOption, tagSelect.lastElementChild);
+                        tagSelect.value = newOption.value;
+
+                        const goal = {
+                            name: newCategory,
+                            amount: 0,
+                            category: newCategory.toLowerCase()
+                        };
+                        goals.push(goal);
+                        localStorage.setItem('goals', JSON.stringify(goals));
+                        loadGoals();
+                    }
+                }
+            });
+
+            loadGoals();
+        });
+    </script>
+</body>
+
+</html>
