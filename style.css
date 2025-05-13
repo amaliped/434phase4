@@ -108,8 +108,11 @@ body {
     align-items: center;
     min-height: 100vh;
     background-color: white;
-    font-family: 'Times New Roman', Times, serif;
     color: #57473A
+}
+
+body, input, button, select, textarea {
+    font-family: 'Times New Roman', Times, sans-serif;
 }
 
 #goalsContainer {
@@ -150,6 +153,7 @@ h1 {
     padding: 10px;
     width: 75%;
     margin: auto;
+    text-align: left;
 }
 
 .submit-button {
@@ -169,7 +173,7 @@ h1 {
     background: transparent;
     outline: none;
     font-size: 26px;
-    text-align: center;
+    text-align: left;
     color: #2c3e50;
 }
 
@@ -211,9 +215,9 @@ h1 {
     width: 90%;
     margin: auto;
     align-items: center;
-    text-align: center;
-    padding: 20px;
-    margin-bottom: 20px;
+    text-align: left;
+    padding: 10px;
+    margin-bottom: 10px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
@@ -232,6 +236,7 @@ h1 {
 
 .entry-details {
     margin-top: 5px;
+    text-align: left;
 }
 
 .entry-note {
