@@ -242,6 +242,7 @@
 
             const incomeLabels = Object.keys(data.income).length ? Object.keys(data.income) : ['No Income Data'];
             const incomeValues = Object.values(data.income).length ? Object.values(data.income) : [0];
+            const totalIncome = incomeValues.reduce((a, b) => a + b, 0);
 
             incomeChart = new Chart(ctx, {
                 type: 'pie',
@@ -249,13 +250,22 @@
                     labels: incomeLabels,
                     datasets: [{
                         data: incomeValues,
-                        backgroundColor: ['#4a90e2']
+                        backgroundColor: ['#4a90e2', '#50e3c2', '#f5a623', '#7b68ee']
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function (context) {
+                                    const value = context.parsed;
+                                    const percentage = totalIncome > 0 ? ((value / totalIncome) * 100).toFixed(1) : 0;
+                                    return `${context.label}: ${percentage}% ($${value.toLocaleString()})`;
+                                }
+                            }
+                        },
                         legend: {
                             position: 'right',
                             labels: {
@@ -268,6 +278,7 @@
                 }
             });
         }
+
 
         function createCashFlowChart(data) {
             const ctx = document.getElementById('cashFlowChart').getContext('2d');
