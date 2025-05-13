@@ -14,7 +14,7 @@
     color: #2c3e50;
     font-size: 28pt;
     text-align: center;
-    
+
 }
 
 .device h2 {
@@ -111,7 +111,11 @@ body {
     color: #57473A
 }
 
-body, input, button, select, textarea {
+body,
+input,
+button,
+select,
+textarea {
     font-family: 'Times New Roman', Times, sans-serif;
 }
 
@@ -143,10 +147,6 @@ body, input, button, select, textarea {
     background-color: #007BFF;
     color: white;
     border-color: #007BFF;
-}
-
-h1 {
-    text-align: center;
 }
 
 .transaction-entries {
@@ -298,7 +298,7 @@ h1 {
 }
 
 footer {
-    position: absolute;
+    position: fixed;
     bottom: 0;
     left: 0;
     right: 0;
@@ -306,15 +306,17 @@ footer {
     justify-content: center;
     align-items: center;
     background-color: #3D453B;
-    width: 100%;
-    height: 20vh;
+    width: 640px;
+    height: 80px;
     border-radius: 10px;
     box-shadow: 0px -4px 10px rgba(0, 0, 0, 0.3);
+    margin: 0 auto;
 }
 
 footer button {
     height: 20vh;
     width: 10000px;
+    max-width: 200px;
     font-size: 30px;
 }
 
@@ -342,12 +344,6 @@ footer .tab:not(.active) {
     margin: 20px auto;
     padding: 20px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.chart-container {
-    width: 100%;
-    height: 300px;
-    margin: 20px 0;
 }
 
 .year-buttons {
@@ -390,7 +386,7 @@ footer .tab:not(.active) {
 .main-content {
     flex: 1;
     overflow-y: auto;
-    padding-bottom: 80px;
+    padding-bottom: 100px;
 }
 
 #nav-bar-container {
@@ -582,7 +578,7 @@ footer .tab:not(.active) {
     margin-top: 10px;
 }
 
-#tagSelect{
+#tagSelect {
     font-size: 14pt;
 }
 
@@ -740,4 +736,61 @@ footer .tab:not(.active) {
     font-size: 16px;
     border-radius: 4px;
     border: 1px solid #ccc;
+}
+
+.transaction-type-selector {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    margin-bottom: 10px;
+}
+
+.transaction-type-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.type-button {
+    padding: 8px 20px;
+    font-size: 16px;
+    border: 2px solid #ccc;
+    border-radius: 5px;
+    cursor: pointer;
+    background-color: white;
+    transition: background-color 0.3s ease;
+}
+
+.type-button.active {
+    background-color: #4a90e2;
+    color: white;
+    border-color: #4a90e2;
+}
+
+.entry-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+    justify-content: flex-end;
+}
+
+.edit-button,
+.delete-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    padding: 6px;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+
+.edit-button:hover {
+    background-color: #e3f2fd;
+    color: #1976d2;
+}
+
+.delete-button:hover {
+    background-color: #ffebee;
+    color: #d32f2f;
 }

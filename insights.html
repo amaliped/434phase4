@@ -240,18 +240,16 @@
                 incomeChart.destroy();
             }
 
+            const incomeLabels = Object.keys(data.income).length ? Object.keys(data.income) : ['No Income Data'];
+            const incomeValues = Object.values(data.income).length ? Object.values(data.income) : [0];
+
             incomeChart = new Chart(ctx, {
                 type: 'pie',
                 data: {
-                    labels: Object.keys(data.income),
+                    labels: incomeLabels,
                     datasets: [{
-                        data: Object.values(data.income),
-                        backgroundColor: [
-                            '#4a90e2',
-                            '#50e3c2',
-                            '#f5a623',
-                            '#7ed321'
-                        ]
+                        data: incomeValues,
+                        backgroundColor: ['#4a90e2']
                     }]
                 },
                 options: {
@@ -284,8 +282,9 @@
             cashFlowChart = new Chart(ctx, {
                 type: 'bar',
                 data: {
-                    labels: ['Income', 'Expenses'],
+                    labels: ['Income Cash Flow', 'Expenses Cash Flow'],
                     datasets: [{
+                        label: 'Cash Flow',
                         data: [savings, totalExpenses],
                         backgroundColor: ['#50e3c2', '#f5a623']
                     }]
