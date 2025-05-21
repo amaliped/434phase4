@@ -794,3 +794,68 @@ footer .tab:not(.active) {
     background-color: #ffebee;
     color: #d32f2f;
 }
+
+.edit-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.edit-modal-content {
+    background-color: white;
+    padding: 30px;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    font-size: 16px;
+}
+
+.edit-modal-content h2 {
+    margin-top: 0;
+    text-align: center;
+    color: #2c3e50;
+}
+
+.edit-modal-content input,
+.edit-modal-content select,
+.edit-modal-content textarea {
+    width: 100%;
+    margin-bottom: 15px;
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+}
+
+.edit-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.save-edit-button,
+.cancel-edit-button {
+    padding: 10px 20px;
+    font-size: 16px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.save-edit-button {
+    background-color: #4a90e2;
+    color: white;
+}
+
+.cancel-edit-button {
+    background-color: #ccc;
+    color: black;
+}

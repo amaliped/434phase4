@@ -290,15 +290,30 @@
             const totalExpenses = Object.values(data.expenses).reduce((a, b) => a + b, 0);
             const savings = totalIncome - totalExpenses;
 
+            let savingsPercentage = 'N/A';
+            let expensesPercentage = 'N/A';
+
+            if (totalIncome > 0) {
+                savingsPercentage = ((savings / totalIncome) * 100).toFixed(1) + '%';
+                expensesPercentage = ((totalExpenses / totalIncome) * 100).toFixed(1) + '%';
+            }
+
             cashFlowChart = new Chart(ctx, {
                 type: 'bar',
                 data: {
-                    labels: ['Income Cash Flow', 'Expenses Cash Flow'],
-                    datasets: [{
-                        label: 'Cash Flow',
-                        data: [savings, totalExpenses],
-                        backgroundColor: ['#50e3c2', '#f5a623']
-                    }]
+                    labels: ['Cash Flow'],
+                    datasets: [
+                        {
+                            label: 'Income',
+                            data: [savings],
+                            backgroundColor: '#50e3c2'
+                        },
+                        {
+                            label: 'Expenses',
+                            data: [totalExpenses],
+                            backgroundColor: '#f5a623'
+                        }
+                    ]
                 },
                 options: {
                     responsive: true,
@@ -315,18 +330,34 @@
                                     size: 18
                                 }
                             }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function (context) {
+                                    const label = context.dataset.label;
+                                    const value = context.raw;
+                                    let percent = 'N/A';
+                                    if (totalIncome > 0) {
+                                        if (label === 'Income') {
+                                            percent = ((savings / totalIncome) * 100).toFixed(1) + '%';
+                                        } else if (label === 'Expenses') {
+                                            percent = ((totalExpenses / totalIncome) * 100).toFixed(1) + '%';
+                                        }
+                                    }
+                                    return `${label}: ${percent} ($${value.toLocaleString()})`;
+                                }
+                            }
                         }
                     }
                 }
             });
 
-            const savingsPercentage = ((savings / totalIncome) * 100).toFixed(1);
-            const expensesPercentage = ((totalExpenses / totalIncome) * 100).toFixed(1);
             document.getElementById('cashFlowSummary').innerHTML = `
-                <p>Income: ${savingsPercentage}% ($${savings.toLocaleString()})</p>
-                <p>Expenses: ${expensesPercentage}% ($${totalExpenses.toLocaleString()})</p>
-            `;
+        <p><strong>Income:</strong> ${savingsPercentage} ($${savings.toLocaleString()})</p>
+        <p><strong>Expenses:</strong> ${expensesPercentage} ($${totalExpenses.toLocaleString()})</p>
+    `;
         }
+
 
         function updateCharts(year) {
             if (year) {

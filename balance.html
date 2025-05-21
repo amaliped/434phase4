@@ -20,7 +20,7 @@
 
                 <!-- New Transaction Type Selector -->
                 <div class="transaction-type-selector">
-                    <label>Select Transaction Type:</label>
+                    <label>Transaction Type:</label>
                     <div class="transaction-type-buttons">
                         <button id="incomeButton" class="type-button active">Income</button>
                         <button id="expenseButton" class="type-button">Expense</button>
@@ -397,7 +397,6 @@
                         note: document.getElementById('editNote').value
                     };
 
-                    // update balance if amount changed
                     if (updated.amount !== transaction.amount) {
                         currentBalance += transaction.type === '+' ? (updated.amount - transaction.amount) : (transaction.amount - updated.amount);
                     }
@@ -411,6 +410,7 @@
                 });
 
                 modal.querySelector('.cancel-edit-button').addEventListener('click', () => modal.remove());
+
             }
 
 
